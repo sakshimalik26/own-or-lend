@@ -23,6 +23,8 @@ export default function Home() {
   const [scenario, setScenario] = useState<Scenario>("profit");
   const [quiz, setQuiz] = useState<Record<number, string>>({});
   const [equityOpen, setEquityOpen] = useState(false);
+  const [shareStepsOpen, setShareStepsOpen] = useState(false);
+  const [bondStepsOpen, setBondStepsOpen] = useState(false);
 
   const totalShares = 1000;
   const sharePrice = 10;
@@ -96,6 +98,13 @@ export default function Home() {
                 <div><span>Your normal voting power</span><strong>{shareType === "ordinary" ? `${ownership.toFixed(0)}%` : "0%"}</strong></div>
               </div>
               <p className="plain-note"><b>In simple words:</b> You own {shares} of the company’s {totalShares} equal ownership pieces. <span>(Ownership = {shares} ÷ {totalShares} × 100 = {ownership.toFixed(0)}%)</span></p>
+              <button className="calc-toggle" type="button" aria-expanded={shareStepsOpen} onClick={() => setShareStepsOpen(!shareStepsOpen)}>{shareStepsOpen ? "Hide step-by-step calculation ↑" : "New to finance? Show calculation step by step ↓"}</button>
+              {shareStepsOpen && <div className="calculation-steps" aria-live="polite">
+                <div><i>1</i><p><b>Find the cost of one share</b><span>One share costs {inr.format(sharePrice)}.</span></p></div>
+                <div><i>2</i><p><b>Calculate the money you invest</b><span>{shares} shares × {inr.format(sharePrice)} = <strong>{inr.format(shareInvestment)}</strong></span></p></div>
+                <div><i>3</i><p><b>Calculate your ownership</b><span>{shares} shares ÷ {totalShares} total shares × 100 = <strong>{ownership.toFixed(0)}%</strong></span></p></div>
+                <div><i>4</i><p><b>Understand your voting power</b><span>{shareType === "ordinary" ? <>Ordinary shares normally give voting power: <strong>{ownership.toFixed(0)}%</strong></> : <>Preference shares normally have no ordinary voting power: <strong>0%</strong></>}</span></p></div>
+              </div>}
             </div>
             <div className="visual" aria-label={`${ownership.toFixed(0)} percent of the company ownership grid is selected`}>
               <div className="building-title"><span>☕ Campus Café Ltd.</span><strong>{ownership.toFixed(0)}% is yours</strong></div>
@@ -117,6 +126,13 @@ export default function Home() {
                 <div><span>Ownership & votes</span><strong>0%</strong></div>
               </div>
               <p className="plain-note"><b>In simple words:</b> The company promises yearly interest and to return {inr.format(amountLent)} after {bondYears} years, but repayment has risk.</p>
+              <button className="calc-toggle" type="button" aria-expanded={bondStepsOpen} onClick={() => setBondStepsOpen(!bondStepsOpen)}>{bondStepsOpen ? "Hide step-by-step calculation ↑" : "New to finance? Show calculation step by step ↓"}</button>
+              {bondStepsOpen && <div className="calculation-steps" aria-live="polite">
+                <div><i>1</i><p><b>Find the cost of one bond</b><span>One bond costs {inr.format(bondPrice)}.</span></p></div>
+                <div><i>2</i><p><b>Calculate how much you lend</b><span>{bonds} bonds × {inr.format(bondPrice)} = <strong>{inr.format(amountLent)}</strong></span></p></div>
+                <div><i>3</i><p><b>Calculate the interest each year</b><span>{inr.format(amountLent)} × {bondRate}% = <strong>{inr.format(annualInterest)}</strong></span></p></div>
+                <div><i>4</i><p><b>Calculate the final-year payment</b><span>{inr.format(amountLent)} principal + {inr.format(annualInterest)} interest = <strong>{inr.format(amountLent + annualInterest)}</strong></span></p></div>
+              </div>}
             </div>
             <div className="visual bond-visual" aria-label={`Cash flow for ${bonds} bonds`}>
               <div className="bond-ticket"><small>CAMPUS CAFÉ BOND</small><strong>{inr.format(amountLent)}</strong><span>Money you lend today</span></div>
@@ -137,7 +153,7 @@ export default function Home() {
           <button className="balance equity" type="button" aria-expanded={equityOpen} onClick={() => setEquityOpen(!equityOpen)}><span>WHAT REMAINS · CLICK TO EXPLORE</span><h3>Owners’ equity</h3><p>The value left for all shareholders</p><strong>₹7,000</strong></button>
         </div>
         {equityOpen && <div className="dividend-answer" aria-live="polite">
-          {shareType === "ordinary" ? <><b>Your ordinary-share dividend: {inr.format(ordinaryDividend)}</b><span>Assuming profit available for dividend is {inr.format(distributableProfit)} and the payout ratio is 100%.</span><small>Formula: {inr.format(distributableProfit)} × {ownership.toFixed(0)}% ownership = {inr.format(ordinaryDividend)}</small></> : <><b>Your preference-share dividend: {inr.format(preferenceDividend)}</b><span>Preference dividend is fixed at 8% of your {inr.format(shareInvestment)} investment.</span><small>Formula: {inr.format(shareInvestment)} × 8% = {inr.format(preferenceDividend)}</small></>}
+          {shareType === "ordinary" ? <><b>Your ordinary-share dividend: {inr.format(ordinaryDividend)}</b><span>Dividend comes from profit, not directly from the ₹7,000 equity shown above.</span><div className="dividend-steps"><p><i>1</i><span>The café has <strong>{inr.format(distributableProfit)} profit</strong> available for dividend.</span></p><p><i>2</i><span>At a 100% payout ratio, the total dividend pool is <strong>{inr.format(distributableProfit)}</strong>.</span></p><p><i>3</i><span>Your ownership is <strong>{ownership.toFixed(0)}%</strong>.</span></p><p><i>4</i><span>{inr.format(distributableProfit)} × {ownership.toFixed(0)}% = <strong>{inr.format(ordinaryDividend)} dividend</strong>.</span></p></div></> : <><b>Your preference-share dividend: {inr.format(preferenceDividend)}</b><span>Your preference dividend is fixed at 8% of the money you invested.</span><div className="dividend-steps"><p><i>1</i><span>You invested <strong>{inr.format(shareInvestment)}</strong>.</span></p><p><i>2</i><span>The fixed preference dividend rate is <strong>8%</strong>.</span></p><p><i>3</i><span>{inr.format(shareInvestment)} × 8% = <strong>{inr.format(preferenceDividend)} dividend</strong>.</span></p></div></>}
         </div>}
       </section>
 
