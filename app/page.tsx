@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 
 type Mode = "shares" | "bonds";
+type ShareType = "ordinary" | "preference";
 type Scenario = "profit" | "loss" | "growth" | "closure";
 
 const scenarios: Record<Scenario, { label: string; emoji: string; shares: string; bonds: string }> = {
@@ -16,15 +17,20 @@ const scenarios: Record<Scenario, { label: string; emoji: string; shares: string
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("shares");
+  const [shareType, setShareType] = useState<ShareType>("ordinary");
   const [shares, setShares] = useState(100);
   const [bonds, setBonds] = useState(2);
   const [scenario, setScenario] = useState<Scenario>("profit");
   const [quiz, setQuiz] = useState<Record<number, string>>({});
+  const [equityOpen, setEquityOpen] = useState(false);
 
   const totalShares = 1000;
   const sharePrice = 10;
   const ownership = (shares / totalShares) * 100;
   const shareInvestment = shares * sharePrice;
+  const distributableProfit = 2000;
+  const ordinaryDividend = distributableProfit * ownership / 100;
+  const preferenceDividend = shareInvestment * 8 / 100;
   const bondPrice = 1000;
   const bondRate = 8;
   const bondYears = 3;
@@ -77,15 +83,19 @@ export default function Home() {
           <div className="lab-grid">
             <div className="controls">
               <div className="fact-strip"><span>Company needs <b>₹10,000</b></span><span>Issues <b>1,000 shares</b></span><span>Price <b>₹10 each</b></span></div>
+              <div className="share-kind" role="group" aria-label="Choose share type">
+                <button aria-pressed={shareType === "ordinary"} onClick={() => { setShareType("ordinary"); setEquityOpen(false); }}>Ordinary shares</button>
+                <button aria-pressed={shareType === "preference"} onClick={() => { setShareType("preference"); setEquityOpen(false); }}>Preference shares · 8%</button>
+              </div>
               <label htmlFor="shares">How many shares would you like?</label>
               <div className="stepper"><button aria-label="Remove ten shares" onClick={() => setShares(Math.max(0, shares - 10))}>−</button><output>{shares}</output><button aria-label="Add ten shares" onClick={() => setShares(Math.min(1000, shares + 10))}>+</button></div>
               <input id="shares" type="range" min="0" max="1000" step="10" value={shares} onChange={e => setShares(Number(e.target.value))} />
               <div className="metrics">
                 <div><span>You invest</span><strong>{inr.format(shareInvestment)}</strong></div>
                 <div className="accent"><span>You own</span><strong>{ownership.toFixed(0)}%</strong></div>
-                <div><span>Your normal voting power</span><strong>{ownership.toFixed(0)}%</strong></div>
+                <div><span>Your normal voting power</span><strong>{shareType === "ordinary" ? `${ownership.toFixed(0)}%` : "0%"}</strong></div>
               </div>
-              <p className="plain-note"><b>In simple words:</b> You own {shares} of the company’s {totalShares} equal ownership pieces.</p>
+              <p className="plain-note"><b>In simple words:</b> You own {shares} of the company’s {totalShares} equal ownership pieces. <span>(Ownership = {shares} ÷ {totalShares} × 100 = {ownership.toFixed(0)}%)</span></p>
             </div>
             <div className="visual" aria-label={`${ownership.toFixed(0)} percent of the company ownership grid is selected`}>
               <div className="building-title"><span>☕ Campus Café Ltd.</span><strong>{ownership.toFixed(0)}% is yours</strong></div>
@@ -124,9 +134,11 @@ export default function Home() {
           <div className="symbol">−</div>
           <div className="balance liabilities"><span>WHAT IT OWES</span><h3>Liabilities</h3><ul><li>Bank loan <b>₹3,000</b></li><li>Bonds <b>₹2,000</b></li></ul><strong>₹5,000</strong></div>
           <div className="symbol">=</div>
-          <div className="balance equity"><span>WHAT REMAINS</span><h3>Owners’ equity</h3><p>The value left for all shareholders</p><strong>₹7,000</strong></div>
+          <button className="balance equity" type="button" aria-expanded={equityOpen} onClick={() => setEquityOpen(!equityOpen)}><span>WHAT REMAINS · CLICK TO EXPLORE</span><h3>Owners’ equity</h3><p>The value left for all shareholders</p><strong>₹7,000</strong></button>
         </div>
-        <div className="caution"><b>Limited liability:</b> If you own 10% of the shares, you do not personally owe 10% of the company’s debts. Your main risk is losing the money you invested.</div>
+        {equityOpen && <div className="dividend-answer" aria-live="polite">
+          {shareType === "ordinary" ? <><b>Your ordinary-share dividend: {inr.format(ordinaryDividend)}</b><span>Assuming profit available for dividend is {inr.format(distributableProfit)} and the payout ratio is 100%.</span><small>Formula: {inr.format(distributableProfit)} × {ownership.toFixed(0)}% ownership = {inr.format(ordinaryDividend)}</small></> : <><b>Your preference-share dividend: {inr.format(preferenceDividend)}</b><span>Preference dividend is fixed at 8% of your {inr.format(shareInvestment)} investment.</span><small>Formula: {inr.format(shareInvestment)} × 8% = {inr.format(preferenceDividend)}</small></>}
+        </div>}
       </section>
 
       <section className="scenario-section">
