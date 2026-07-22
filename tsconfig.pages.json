@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "db",
+    "examples",
+    "drizzle.config.ts",
+    "vinext.config.ts",
+    "worker-configuration.d.ts"
+  ]
+}
